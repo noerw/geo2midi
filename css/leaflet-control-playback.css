@@ -1,0 +1,5 @@
+.playback-control a, .playback-control a:hover {
+  width: auto;
+  padding-left: 4px;
+  padding-right: 4px;
+}
