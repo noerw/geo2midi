@@ -12,7 +12,7 @@
       this.currentPos = this.options.min;
     },
     onAdd: function(map) {
-      map.createPane('playheadPane')//.style.zIndex = 1; //TODO: FIX!!!
+      map.createPane('playheadPane'); //.style.zIndex = 10; //TODO: fix z-index -> on top??
       this.cursor = L.polyline([], { pane: 'playheadPane' }).addTo(map);
       this.leftBounds = L.rectangle([[-180,-180],[180,0]], { pane: 'playheadPane' }).addTo(map);
       this.rightBounds = L.rectangle([[-180,0],[180,180]], { pane: 'playheadPane' }).addTo(map);
@@ -25,6 +25,8 @@
     },
     onRemove: function(map) {
       this.cursor.removeFrom(map);
+      this.leftBounds.removeFrom(map);
+      this.rightBounds.removeFrom(map);
     },
     setPos: function(pos) {
       var max = this.options.max, maxDiff = pos - max,
@@ -50,6 +52,7 @@
       this.options.max = minMax.max;
       this.options.min = minMax.min;
       
+      if (!this._map) return;
       var mapBounds = this._map.getBounds();
       this.leftBounds.setBounds([[-180, mapBounds._southWest.lng - 20], [180, minMax.min]]);
       this.rightBounds.setBounds([[-180, minMax.max], [180, mapBounds._northEast.lng + 20]]);
