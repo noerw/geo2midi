@@ -1,0 +1,31 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" charset="UTF-8">
+    <title>geo2midi - geographic midi sequencer</title>
+
+    <link rel="stylesheet" href="lib/leaflet/leaflet.css">
+    <link rel="stylesheet" href="../leaflet-playback.css">
+    <style>
+    html, body, #map {
+      margin: 0;
+      height: 100%;
+    }
+    .leaflet-container .leaflet-control-attribution {
+      background-color: transparent;
+      color: #999;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script src="lib/leaflet/leaflet.js" charset="utf-8"></script>
+    <script src="lib/webmidi.min.js" charset="utf-8"></script>
+    <script src="../storyline.js" charset="utf-8"></script>
+    <script src="../leaflet-playback.js" charset="utf-8"></script>
+    <script src="index.js" charset="utf-8"></script>
+</body>
+</html>

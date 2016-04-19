@@ -1,9 +1,0 @@
-html, body, #map {
-    margin: 0;
-    height: 100%;
-}
-
-.leaflet-container .leaflet-control-attribution {
-  background-color: transparent;
-  color: #999;
-}

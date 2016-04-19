@@ -1,7 +1,6 @@
 (function() {
-  var map, playback, layer, sequence, dataset = 'data/USA-states.geojson',
+  var map, playback, layer, dataset = 'USA-states.geojson',
    previousData = { gate: 0, velocity: 0, pitch: 0 };
-
 
   function init() {
     WebMidi.enable(function success() {
@@ -26,14 +25,7 @@
       maxZoom: 19
     }));
 
-    playback = L.control.playback({ loop: false })
-      .addTo(map)
-      .loadSequence({
-        gate: ['2 cut to 0', '3 ease to 2', '4 ease to -2', '5 cut to 0'],
-        velocity: ['2 cut to 0', '3 ease to 2', '4 ease to -2', '5 cut to 0'],
-        pitch: ['2 cut to 0', '3 ease to 2', '4 ease to -2', '5 cut to 0']
-      }, -179, 160, 1);
-
+    playback = L.control.playback().addTo(map);
     playback.on('play', function(e) { console.log(e); });
     playback.on('pause', function(e) { console.log(e); });
     playback.on('sequenceData', onSequenceData);
@@ -59,7 +51,7 @@
   }
 
   function loadGeoJSON(json) {
-    sequence = { gate: [], velocity: [], pitch: [] };
+    var sequence = { gate: [], velocity: [], pitch: [] };
 
     if (layer) layer.removeFrom(map);
     layer = L.geoJson(json, {
@@ -81,7 +73,7 @@
         sequence.pitch.push(end + ' cut to ' + pitch);
 
         layer.on('click', function(e){
-          playback.setPlayhead(start);
+          playback.setPlayheadPos(start);
           L.DomEvent.stopPropagation(e);
         });
       }
@@ -95,7 +87,7 @@
     sequence.pitch.push(layerBounds.getWest() - 1 + ' cut to 0');
     sequence.pitch.sort(sortSequenceData);
 
-    playback.loadSequence(sequence, layerBounds.getWest() - 1, layerBounds.getEast() + 1, 2);
+    playback.loadSequence(sequence, layerBounds.getWest() - 1, layerBounds.getEast() + 1, 4);
     map.addLayer(layer).fitBounds(layerBounds);
   }
 
@@ -115,5 +107,4 @@
   }
 
   init();
-
 })();

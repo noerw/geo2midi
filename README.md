@@ -1,58 +1,126 @@
-# geo2midi
-experimental GeoJSON -> MIDI converter/player, running on leaflet.js v1.x
+# leaflet-playback
+sequencer on top of leaflet (v1.x)
 
 ---
 
-This tool is a proof of concept, loading GeoJSON data into a map which then may be "played back" as in a usual audio-/ midi-player.
+This is a control for leaflet 1.0, allowing you to "play back" spatial data.
 
-By default it tries to output the sequence-data as midi events via the WebMIDI-API (currently only supported in `chromium >=v43`). Other backends my be used instead, making this a generic "geo-sequencer".
+`leaflet-playback` features a generic sequencer with a UI, allowing timed data-output based on a position on the map.
+Sequence-data must be generated & parsed by the host application using the event-based API.
 
-You may customize which of the GeoJSON properties are mapped to which (MIDI-) parameters. The default mapping is:
+## example
+The `examples` folder (live [here](http://noerw.github.io/leaflet-playback/examples/)) contains a proof of concept for a **GeoJSON->MIDI converter/player**,
+which loads GeoJSON data into a map thats "played back" as in a usual audio-/ midi-player.
+It tries to output the sequence-data as MIDI events via the WebMIDI-API (currently only supported in `chromium >=v43`).
 
-* latitude-extent of an object -> gate (note on/off),
-* min longitude -> pitch
-* max longitude -> velocity
+Yeah, sounds weird. Polygons are converted to MIDI notes, by mapping the geometry to the following parameters:
 
-`geo2midi` is developed in an effort to get familiar with leaflet's API changes in v1.0, and to explore sequencing in the browser.
-Let me know if you used the playback-control in some interesting way!
+* longitude-extent  -> gate (note on/off),
+* min latitude -> pitch
+* max latitude -> velocity
+
+This library was was initially developed in an effort to get familiar with leaflet's API changes in v1.0, and to explore sequencing in the browser.
+No, actually I just wanted to hear what spatial data may sound like.
+
+Tell me if you find a good use for this! :^)
 
 ## usage
+0. load `leaflet-playback` & dependencies in HTML
 
-### minimal example
-0. load leaflet & playbackControl scripts in HTML
-```html
-<script src="lib/leaflet/leaflet.js" charset="utf-8"></script>
-<script src="lib/storyline.js" charset="utf-8"></script>
-<script src="js/IOadapter.js" charset="utf-8"></script>
-<script src="js/sequencer.js" charset="utf-8"></script>
-<script src="js/leaflet-control-playback_playhead.js" charset="utf-8"></script>
-<script src="js/leaflet-control-playback.js" charset="utf-8"></script>
-```
+        <script src="leaflet.js" charset="utf-8"></script>
+        <script src="storyline.js" charset="utf-8"></script>
+        <script src="js/leaflet-playback.js" charset="utf-8"></script>
+
 1. create a map
-```js
-var map = L.map('map');
-```
-2. get some GeoJSON data
-```js
-var dataset = { type: "FeatureCollection"  ... };
-```
-3. initialize the MIDI backend
-```js
-var midiOut = ...
-```
-4. initialize the sequencer
-```js
-var playbackOptions = {
-  midiOut: midiOut,
-  geojson: dataset
-};
-var playbackControl = L.control.playback(playbackOptions)
-```
-5. connect some hardware to your midiOut
-6. enjoy the beauty of spatial music!
 
-### API
-`todo`
+        var map = L.map('map');
+
+2. initialize the playback control
+
+        var opts = {
+          speed: 1,   // playback speed (who needs a unit?!?)
+          start: 1,   // longitude where the sequencer starts
+          stop: 14,   // longitude where the sequencer ends
+          loop: true, // well..
+        };
+        var playback = L.control.playback(opts).addTo(map);
+
+3. get some sequence data. must be in the format of [`Storyline.js`](https://github.com/spite/Storyline.js#using-storylinejs).
+
+        var sequence = { foo: ['0 cut to 0', '2 ease to 2', '4 ease to 0'] };
+
+4. load it, while defining start-/endpoint & speed
+
+        playback.loadSequence(sequence, 0, 4, 2.5);
+
+5. wait for data
+
+        playback.on('play', function(e) {
+          console.log('playing from ' + e.playbackPosition);
+        });
+        playback.on('pause', function(e) {
+          console.log('paused at ' + e.playbackPosition);
+        });
+        playback.on('sequenceData', function(e) {
+          console.log('data at ' + e.playbackPosition ': ' + JSON.stringify(e.sequenceData));
+        });
+
+6. press play & enjoy!
+
+## API
+
+### Creation
+    L.control.playback([options])
+
+
+Initializes the whole control. `options` are optional and may be set as follows:
+
+    {
+      position: 'topleft', // inherited from L.Control
+      speed: 1,            // playback speed, without unit
+      start: 1,            // longitude where the sequencer starts
+      stop: 14,            // longitude where the sequencer ends
+      loop: true,          // start over when reaching the end of the sequence
+    }
+
+### Methods
+also, [see the inherited methods from L.Control](http://leafletjs.com/reference-1.0.0.html#control).
+
+#### loadSequence(sequenceData, start, end, [speed])
+Loads a sequence, where
+`sequenceData` is a [`Storyline.js sequence`](https://github.com/spite/Storyline.js#using-storylinejs),
+`start` & `end` define new borders of the sequencer as longitude-values, and
+`speed` optionally sets the playback-speed.
+
+#### getPlayheadPos()
+Returns the current positions of the playhead as longitude
+
+#### setPlayheadPos(longitude)
+Sets a longitude value as new position of the playhead. Must be within the `start` and `stop` values.
+
+### Events
+The control fires the following events with respective event payload:
+
+#### start
+Fired when the sequencer begins doing its thing.
+
+    { playbackPosition: <float> }
+
+#### pause
+Fired when the sequencer takes a break.
+
+    { playbackPosition: <float> }
+
+#### sequenceData
+Fired when the sequencer outputs new data.
+This generally happens while playing everytime the browser renders a frame, eg. 30 or 60 times a second.
+
+    {
+      playbackPosition: <float>  // current position of playback
+      sequenceData:     <object> // contains the output of Storyline.js for the given time.
+      deltaTime:        <float>  // millisecs since last update
+      timestamp:        <float>  // timestamp from performance.now()
+    }
 
 ## license
 GPL-3.0

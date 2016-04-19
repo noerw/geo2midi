@@ -96,10 +96,10 @@
       this.sequencer.loadSequence(sequenceData);
       return this;
     },
-    getPlayhead() {
+    getPlayheadPos() {
       return this.playhead.getPosition();
     },
-    setPlayhead(lng) {
+    setPlayheadPos(lng) {
       this.playhead.setPosition(lng);
       return this;
     },
