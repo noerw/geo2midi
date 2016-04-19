@@ -3,7 +3,6 @@
     options: {
       position: 'topleft',
       playbackSpeed: 1,
-      midiOutput: null,
       onUpdate: null, //function(data, delta, timestamp) {}
       attributeMapping: { gate: 'latitude', velocity: 'area', pitch: 'longitude' },
       geojson: ''
@@ -13,7 +12,7 @@
       L.Util.setOptions(this, options);
       this.playing = false;
       this.playhead = L.playhead({min: 1, max:14});
-      this.IOadapter = window.IOadapter(this.options.midiOutput, this.options.attributeMapping);
+      this.IOadapter = window.IOadapter(this.options.attributeMapping);
       this.sequencer = window.sequencer(function(data, delta, timestamp) {
         var newPos = _this.playhead.getPos() + delta * _this.options.playbackSpeed / 1000;
         _this.playhead.setPos(newPos);

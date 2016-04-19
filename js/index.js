@@ -115,7 +115,7 @@ function Map(element) {
       keyboard: false,        scrollWheelZoom: false,
       touchZoom: false,
       zoom: 7,                center: [51.96, 7.63],
-      minZoom: 2,             maxBounds: [[-180,-180], [180, 180]]
+      minZoom: 2
     });
     map.addLayer(L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
@@ -125,7 +125,7 @@ function Map(element) {
     
     playback = L.control.playback();
     playback.addTo(map);
-    playback.loadSequence(dataset, 1, 1.5);
+    playback.loadSequence(dataset, 3, 1.5);
     return map;
   }
   
