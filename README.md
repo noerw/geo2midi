@@ -33,13 +33,14 @@ Tell me if you find a good use for this! :^)
         <script src="storyline.js" charset="utf-8"></script>
         <script src="js/leaflet-playback.js" charset="utf-8"></script>
 
-1. create a map
+1. initialize the playback control
+
+        var playback = L.control.playback();
+
+2. create a map & add the control. This is not necessary if you don't want the UI.
 
         var map = L.map('map');
-
-2. initialize the playback control
-
-        var playback = L.control.playback().addTo(map);
+        playback.addTo(map);
 
 3. get some sequence data. must be in the format of [`Storyline.js`](https://github.com/spite/Storyline.js#using-storylinejs).
 

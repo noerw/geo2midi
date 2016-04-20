@@ -75,13 +75,13 @@
       if (e) L.DomEvent.preventDefault(e);
       if (!this.playing) {
         if ( this.sequencer.start(this.playhead.getPosition()) ) {
-          this.btnPlay.innerHTML = '<b>PAUSE</b>';
+          if (this._map) this.btnPlay.innerHTML = '<b>PAUSE</b>';
           this.fire('play', { playbackPosition: this.playhead.getPosition() });
           this.playing = true;
         }
       } else {
         this.sequencer.stop();
-        this.btnPlay.innerHTML = '<b>PLAY</b>';
+        if (this._map) this.btnPlay.innerHTML = '<b>PLAY</b>';
         this.fire('pause', { playbackPosition: this.playhead.getPosition() });
         this.playing = false;
       }
