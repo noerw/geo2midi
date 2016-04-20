@@ -1,15 +1,15 @@
 # leaflet-playback
-sequencer on top of leaflet (v1.x)
+sequencer on top of `leaflet.js 1.0`
 
 ---
 
 This is a control for leaflet 1.0, allowing you to "play back" spatial data.
 
-`leaflet-playback` features a generic sequencer with a UI, allowing timed data-output based on a position on the map.
+`leaflet-playback` features a **generic sequencer with a UI**, allowing timed data-output based on a position on the map.
 Sequence-data must be generated & parsed by the host application using the event-based API.
 
 ## example
-The `examples` folder (live [here](http://noerw.github.io/leaflet-playback/examples/)) contains a proof of concept for a **GeoJSON->MIDI converter/player**,
+The `examples` folder contains a proof of concept for a **GeoJSON->MIDI converter/player** (live [here](http://noerw.github.io/leaflet-playback/examples/index.html)),
 which loads GeoJSON data into a map thats "played back" as in a usual audio-/ midi-player.
 It tries to output the sequence-data as MIDI events via the WebMIDI-API (currently only supported in `chromium >=v43`).
 
@@ -24,6 +24,8 @@ No, actually I just wanted to hear what spatial data may sound like.
 
 Tell me if you find a good use for this! :^)
 
+---
+
 ## usage
 0. load `leaflet-playback` & dependencies in HTML
 
@@ -37,43 +39,33 @@ Tell me if you find a good use for this! :^)
 
 2. initialize the playback control
 
-        var opts = {
-          speed: 1,   // playback speed (who needs a unit?!?)
-          start: 1,   // longitude where the sequencer starts
-          stop: 14,   // longitude where the sequencer ends
-          loop: true, // well..
-        };
-        var playback = L.control.playback(opts).addTo(map);
+        var playback = L.control.playback().addTo(map);
 
 3. get some sequence data. must be in the format of [`Storyline.js`](https://github.com/spite/Storyline.js#using-storylinejs).
 
         var sequence = { foo: ['0 cut to 0', '2 ease to 2', '4 ease to 0'] };
 
-4. load it, while defining start-/endpoint & speed
+4. load it, while defining start-/endpoint & playback speed
 
         playback.loadSequence(sequence, 0, 4, 2.5);
 
 5. wait for data
 
-        playback.on('play', function(e) {
-          console.log('playing from ' + e.playbackPosition);
-        });
-        playback.on('pause', function(e) {
-          console.log('paused at ' + e.playbackPosition);
-        });
         playback.on('sequenceData', function(e) {
           console.log('data at ' + e.playbackPosition ': ' + JSON.stringify(e.sequenceData));
         });
 
 6. press play & enjoy!
 
+---
+
 ## API
 
 ### Creation
+
     L.control.playback([options])
 
-
-Initializes the whole control. `options` are optional and may be set as follows:
+Initializes the whole control. `options` are optional and default to the following values:
 
     {
       position: 'topleft', // inherited from L.Control
@@ -84,6 +76,7 @@ Initializes the whole control. `options` are optional and may be set as follows:
     }
 
 ### Methods
+All functions - except getters - may be chained.
 also, [see the inherited methods from L.Control](http://leafletjs.com/reference-1.0.0.html#control).
 
 #### loadSequence(sequenceData, start, end, [speed])
@@ -97,6 +90,8 @@ Returns the current positions of the playhead as longitude
 
 #### setPlayheadPos(longitude)
 Sets a longitude value as new position of the playhead. Must be within the `start` and `stop` values.
+
+---
 
 ### Events
 The control fires the following events with respective event payload:
@@ -121,6 +116,8 @@ This generally happens while playing everytime the browser renders a frame, eg. 
       deltaTime:        <float>  // millisecs since last update
       timestamp:        <float>  // timestamp from performance.now()
     }
+
+---
 
 ## license
 GPL-3.0
