@@ -91,6 +91,18 @@ Returns the current positions of the playhead as longitude
 #### setPlaybackPosition(longitude)
 Sets a longitude value as new position of the playhead. Must be within the `start` and `stop` values.
 
+#### play([playbackPosition])
+Starts the sequencer, if its not running. Optionally starts at a given longitude.
+
+#### pause([stop])
+Pauses the sequencer, if its running. If optional `stop` is true, the playhead is resetted to the start of the sequence.
+
+#### stop()
+Alias for `pause(true)`.
+
+#### togglePlay()
+Toggles play/pause state of the sequencer, so you don't need to write your own toggle. :^)
+
 ---
 
 ### Events

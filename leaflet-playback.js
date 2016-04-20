@@ -27,7 +27,7 @@
           minMax = _this.playhead.getMinMax();
 
         if(!_this.options.loop && newPos >= minMax.max) {
-          _this._togglePlay();
+          _this.togglePlay();
           _this.playhead.setPosition(minMax.min);
           return 'stop';
         }
@@ -60,7 +60,7 @@
         this.playhead.setMinMax(this.playhead.getMinMax());
       }, this);
 
-      L.DomEvent.addListener(this.btnPlay, 'click', this._togglePlay, this);
+      L.DomEvent.addListener(this.btnPlay, 'click', this.togglePlay, this);
       L.DomEvent.disableClickPropagation(container);
 
       return container;
@@ -69,9 +69,9 @@
       this.playhead.removeFrom(map);
       map.off('click', this);
       map.off('moveend', this);
-      L.DomEvent.removeListener(this.btnPlay, 'click', this._togglePlay, this);
+      L.DomEvent.removeListener(this.btnPlay, 'click', this.togglePlay, this);
     },
-    _togglePlay: function(e) {
+    togglePlay: function(e) {
       if (e) L.DomEvent.preventDefault(e);
       if (!this.playing) {
         if ( this.sequencer.start(this.playhead.getPosition()) ) {
@@ -85,6 +85,25 @@
         this.fire('pause', { playbackPosition: this.playhead.getPosition() });
         this.playing = false;
       }
+      return this;
+    },
+    play: function(playbackPos) {
+      if (!this.playing) {
+        if (typeof playbackPos === 'number')
+          this.playhead.setPosition(playbackPos);
+        this.togglePlay();
+      }
+      return this;
+    },
+    pause: function(stop) {
+      if (this.playing) {
+        this.togglePlay();
+        if (stop) this.playhead.setPosition(this.playhead.getMinMax().min);
+      }
+      return this;
+    },
+    stop: function() {
+      return this.pause(true);
     },
     loadSequence: function(sequenceData, sequenceStart, sequenceEnd, playbackSpeed) {
       if (typeof sequenceStart === 'number' && typeof sequenceEnd === 'number')
