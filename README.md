@@ -85,10 +85,10 @@ Loads a sequence, where
 `start` & `end` define new borders of the sequencer as longitude-values, and
 `speed` optionally sets the playback-speed.
 
-#### getPlayheadPos()
+#### getPlaybackPosition()
 Returns the current positions of the playhead as longitude
 
-#### setPlayheadPos(longitude)
+#### setPlaybackPosition(longitude)
 Sets a longitude value as new position of the playhead. Must be within the `start` and `stop` values.
 
 ---

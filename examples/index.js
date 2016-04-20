@@ -36,7 +36,8 @@
   }
 
   function onSequenceData(e) {
-    //console.log(e.sequenceData);
+    // console.log(e.sequenceData);
+    // console.log(e.playbackPosition);
     if (!WebMidi.connected || e.sequenceData.gate === null) return;
 
     // check if an event is due. if so; send corresponding midi!
@@ -73,7 +74,7 @@
         sequence.pitch.push(end + ' cut to ' + pitch);
 
         layer.on('click', function(e){
-          playback.setPlayheadPos(start);
+          playback.setPlaybackPosition(start);
           L.DomEvent.stopPropagation(e);
         });
       }
