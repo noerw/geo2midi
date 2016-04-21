@@ -30,8 +30,7 @@ Tell me if you find a good use for this! :^)
 0. load `leaflet-playback` & dependencies in HTML
 
         <script src="leaflet.js" charset="utf-8"></script>
-        <script src="storyline.js" charset="utf-8"></script>
-        <script src="js/leaflet-playback.js" charset="utf-8"></script>
+        <script src="js/leaflet-playback.min.js" charset="utf-8"></script>
 
 1. initialize the playback control
 

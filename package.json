@@ -1,0 +1,35 @@
+{
+  "name": "leaflet-playback",
+  "version": "0.1.1",
+  "description": "a sequencer in a leaflet.js control",
+  "main": "",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "grunt lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noerw/leaflet-playback.git"
+  },
+  "keywords": [
+    "leaflet",
+    "control",
+    "sequencer",
+    "midi",
+    "geo"
+  ],
+  "author": "",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/noerw/leaflet-playback/issues"
+  },
+  "homepage": "https://github.com/noerw/leaflet-playback#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-release-it": "^1.0.1"
+  }
+}

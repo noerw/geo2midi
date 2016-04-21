@@ -115,13 +115,13 @@
       this.sequencer.loadSequence(sequenceData);
       return this;
     },
-    getPlaybackPosition() {
+    getPlaybackPosition: function() {
       return this.playhead.getPosition();
     },
-    setPlaybackPosition(lng) {
+    setPlaybackPosition: function(lng) {
       this.playhead.setPosition(lng);
       return this;
-    },
+    }
   });
 
   L.control.playback = function(options) {
