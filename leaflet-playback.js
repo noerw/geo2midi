@@ -10,6 +10,10 @@
       start: 1,
       stop: 14,
       loop: true,
+      btnPlayContent:  '<span style="font-size: 130%" title="PLAY">&blacktriangleright;</span>',
+      btnPauseContent: '<span style="font-size: 80%" title="PAUSE">&marker;&marker;</span>',
+      btnStopContent:  '<span title="STOP">&FilledSmallSquare;</span>',
+      btnLoopContent:  '<span style="font-size: 130%" title="LOOP">&lrhar;</span>'
     },
     initialize: function (options) {
       var _this = this;
@@ -46,21 +50,31 @@
     onAdd: function (map) {
       this.playhead.addTo(map);
 
-      var container = L.DomUtil.create('div', 'playback-control leaflet-bar');
-      this.btnPlay = L.DomUtil.create('a', '', container);
-      this.btnPlay.innerHTML = '<b>' + (this.playing ? 'PAUSE' : 'PLAY') + '</b>';
-      this.btnPlay.href = '#';
-
       map.on('click', function(e) {
         var minMax = this.playhead.getMinMax();
         if (e.latlng.lng >= minMax.min && e.latlng.lng < minMax.max)
           this.playhead.setPosition(e.latlng.lng);
       }, this);
+      // resize the minmax shadows when moving the map
       map.on('moveend', function(e) {
         this.playhead.setMinMax(this.playhead.getMinMax());
       }, this);
 
+      var container = L.DomUtil.create('div', 'leaflet-bar horizontal');
+
+      this.btnPlay = L.DomUtil.create('a', '', container);
+      this.btnPlay.innerHTML = this.options.btnPlayContent;
+      this.btnPlay.href = '#';
       L.DomEvent.addListener(this.btnPlay, 'click', this.togglePlay, this);
+      this.btnStop = L.DomUtil.create('a', '', container);
+      this.btnStop.innerHTML = this.options.btnStopContent;
+      this.btnStop.href = '#';
+      L.DomEvent.addListener(this.btnStop, 'click', this.stop, this);
+      this.btnLoop = L.DomUtil.create('a', this.options.loop ? 'enabled' : '', container);
+      this.btnLoop.innerHTML = this.options.btnLoopContent;
+      this.btnLoop.href = '#';
+      L.DomEvent.addListener(this.btnLoop, 'click', this.toggleLoop, this);
+
       L.DomEvent.disableClickPropagation(container);
 
       return container;
@@ -70,18 +84,26 @@
       map.off('click', this);
       map.off('moveend', this);
       L.DomEvent.removeListener(this.btnPlay, 'click', this.togglePlay, this);
+      L.DomEvent.removeListener(this.btnStop, 'click', this.stop, this);
+      L.DomEvent.removeListener(this.btnLoop, 'click', this.toggleLoop, this);
+    },
+    toggleLoop(e) {
+      if (typeof e !== 'undefined') L.DomEvent.preventDefault(e);
+      this.options.loop = !this.options.loop;
+      this.btnLoop.classList.toggle('enabled');
+      return this;
     },
     togglePlay: function(e) {
-      if (e) L.DomEvent.preventDefault(e);
+      if (typeof e !== 'undefined') L.DomEvent.preventDefault(e);
       if (!this.playing) {
         if ( this.sequencer.start(this.playhead.getPosition()) ) {
-          if (this._map) this.btnPlay.innerHTML = '<b>PAUSE</b>';
+          if (this._map) this.btnPlay.innerHTML = this.options.btnPauseContent;
           this.fire('play', { playbackPosition: this.playhead.getPosition() });
           this.playing = true;
         }
       } else {
         this.sequencer.stop();
-        if (this._map) this.btnPlay.innerHTML = '<b>PLAY</b>';
+        if (this._map) this.btnPlay.innerHTML = this.options.btnPlayContent;
         this.fire('pause', { playbackPosition: this.playhead.getPosition() });
         this.playing = false;
       }
@@ -96,13 +118,14 @@
       return this;
     },
     pause: function(stop) {
-      if (this.playing) {
+      if (stop)
+        this.playhead.setPosition(this.playhead.getMinMax().min);
+      if (this.playing)
         this.togglePlay();
-        if (stop) this.playhead.setPosition(this.playhead.getMinMax().min);
-      }
       return this;
     },
-    stop: function() {
+    stop: function(e) {
+      if (typeof e !== 'undefined') L.DomEvent.preventDefault(e);
       return this.pause(true);
     },
     loadSequence: function(sequenceData, sequenceStart, sequenceEnd, playbackSpeed) {

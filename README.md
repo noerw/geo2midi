@@ -68,11 +68,16 @@ Tell me if you find a good use for this! :^)
 Initializes the whole control. `options` are optional and default to the following values:
 
     {
-      position: 'topleft', // inherited from L.Control
       speed: 1,            // playback speed, without unit
       start: 1,            // longitude where the sequencer starts
       stop: 14,            // longitude where the sequencer ends
       loop: true,          // start over when reaching the end of the sequence
+      position: 'topleft', // inherited from L.Control
+      // content of the control's buttons
+      btnPlayContent:  '<span style="font-size: 130%; line-height: 24px" title="PLAY">&blacktriangleright;</span>',
+      btnPauseContent: '<span style="font-size: 80%" title="PAUSE">&marker;&marker;</span>',
+      btnStopContent:  '<span title="STOP">&FilledSmallSquare;</span>',
+      btnLoopContent:  '<span style="font-size: 130%" title="LOOP">&lrhar;</span>'
     }
 
 ### Methods
@@ -102,6 +107,9 @@ Alias for `pause(true)`.
 
 #### togglePlay()
 Toggles play/pause state of the sequencer, so you don't need to write your own toggle. :^)
+
+#### toggleLoop()
+Toggles looping behaviour of the sequencer.
 
 ---
 
