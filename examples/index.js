@@ -36,8 +36,6 @@
   }
 
   function onSequenceData(e) {
-    // console.log(e.sequenceData);
-    // console.log(e.playbackPosition);
     if (!WebMidi.connected || e.sequenceData.gate === null) return;
 
     // check if an event is due. if so; send corresponding midi!
