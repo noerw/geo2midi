@@ -10,10 +10,11 @@
       start: 1,
       stop: 14,
       loop: true,
-      btnPlayContent:  '<span style="font-size: 130%" title="PLAY">&blacktriangleright;</span>',
-      btnPauseContent: '<span style="font-size: 80%" title="PAUSE">&marker;&marker;</span>',
-      btnStopContent:  '<span title="STOP">&FilledSmallSquare;</span>',
-      btnLoopContent:  '<span style="font-size: 130%" title="LOOP">&lrhar;</span>'
+      clickHandlers: true,
+      btnPlay:  '<span style="font-size: 130%" title="PLAY">&blacktriangleright;</span>',
+      btnPause: '<span style="font-size: 80%" title="PAUSE">&marker;&marker;</span>',
+      btnStop:  '<span title="STOP">&FilledSmallSquare;</span>',
+      btnLoop:  '<span style="font-size: 130%" title="LOOP">&lrhar;</span>'
     },
     initialize: function (options) {
       var _this = this;
@@ -50,60 +51,88 @@
     onAdd: function (map) {
       this.playhead.addTo(map);
 
-      map.on('click', function(e) {
-        var minMax = this.playhead.getMinMax();
-        if (e.latlng.lng >= minMax.min && e.latlng.lng < minMax.max)
-          this.playhead.setPosition(e.latlng.lng);
-      }, this);
+      if (this.options.clickHandlers) map.on('click', this._onClick, this);
+
       // resize the minmax shadows when moving the map
       map.on('moveend', function(e) {
         this.playhead.setMinMax(this.playhead.getMinMax());
       }, this);
 
       var container = L.DomUtil.create('div', 'leaflet-bar horizontal');
-
-      this.btnPlay = L.DomUtil.create('a', '', container);
-      this.btnPlay.innerHTML = this.options.btnPlayContent;
-      this.btnPlay.href = '#';
-      L.DomEvent.addListener(this.btnPlay, 'click', this.togglePlay, this);
-      this.btnStop = L.DomUtil.create('a', '', container);
-      this.btnStop.innerHTML = this.options.btnStopContent;
-      this.btnStop.href = '#';
-      L.DomEvent.addListener(this.btnStop, 'click', this.stop, this);
-      this.btnLoop = L.DomUtil.create('a', this.options.loop ? 'enabled' : '', container);
-      this.btnLoop.innerHTML = this.options.btnLoopContent;
-      this.btnLoop.href = '#';
-      L.DomEvent.addListener(this.btnLoop, 'click', this.toggleLoop, this);
-
       L.DomEvent.disableClickPropagation(container);
+
+      if (this.options.btnPlay) {
+        this.btnPlay = L.DomUtil.create('a', '', container);
+        this.btnPlay.innerHTML = this.options.btnPlay;
+        this.btnPlay.href = '#';
+        L.DomEvent.addListener(this.btnPlay, 'click', this.togglePlay, this);
+      }
+      if (this.options.btnStop) {
+        this.btnStop = L.DomUtil.create('a', '', container);
+        this.btnStop.innerHTML = this.options.btnStop;
+        this.btnStop.href = '#';
+        L.DomEvent.addListener(this.btnStop, 'click', this.stop, this);
+      }
+      if (this.options.btnLoop) {
+        this.btnLoop = L.DomUtil.create('a', this.options.loop ? 'enabled' : '', container);
+        this.btnLoop.innerHTML = this.options.btnLoop;
+        this.btnLoop.href = '#';
+        L.DomEvent.addListener(this.btnLoop, 'click', this.toggleLoop, this);
+      }
 
       return container;
     },
     onRemove: function (map) {
       this.playhead.removeFrom(map);
-      map.off('click', this);
+      map.off('click', this._onClick, this);
       map.off('moveend', this);
-      L.DomEvent.removeListener(this.btnPlay, 'click', this.togglePlay, this);
-      L.DomEvent.removeListener(this.btnStop, 'click', this.stop, this);
-      L.DomEvent.removeListener(this.btnLoop, 'click', this.toggleLoop, this);
+      if (this.btnPlay)
+        L.DomEvent.removeListener(this.btnPlay, 'click', this.togglePlay, this);
+      if (this.btnStop)
+        L.DomEvent.removeListener(this.btnStop, 'click', this.stop, this);
+      if (this.btnLoop)
+        L.DomEvent.removeListener(this.btnLoop, 'click', this.toggleLoop, this);
+    },
+    _onClick: function(e) {
+      var minMax = this.playhead.getMinMax(),
+        pPos = this.playhead.getPosition(),
+        clickPos = e.latlng.lng,
+        shift = e.originalEvent.shiftKey,
+        ctrl = e.originalEvent.ctrlKey;
+
+      // set minMax when clicked with ctrl or shift
+      if (ctrl)  this.playhead.setMinMax({ min: minMax.min, max: clickPos });
+      if (shift) this.playhead.setMinMax({ min: clickPos, max: minMax.max });
+
+      // reset playhead position if its outside of the new minMax
+      minMax = this.playhead.getMinMax();
+      if (minMax.min > pPos || minMax.max < pPos)
+        this.playhead.setPosition(clickPos);
+      if (shift || ctrl) return;
+
+      // set playhead position if clicked (without modifiers) within the minmax range
+      if (clickPos >= minMax.min && clickPos < minMax.max)
+        this.playhead.setPosition(clickPos);
     },
     toggleLoop(e) {
       if (typeof e !== 'undefined') L.DomEvent.preventDefault(e);
       this.options.loop = !this.options.loop;
-      this.btnLoop.classList.toggle('enabled');
+      if (this._map && this.btnLoop) this.btnLoop.classList.toggle('enabled');
       return this;
     },
     togglePlay: function(e) {
       if (typeof e !== 'undefined') L.DomEvent.preventDefault(e);
       if (!this.playing) {
         if ( this.sequencer.start(this.playhead.getPosition()) ) {
-          if (this._map) this.btnPlay.innerHTML = this.options.btnPauseContent;
+          if (this._map && this.btnPlay)
+            this.btnPlay.innerHTML = this.options.btnPause;
           this.fire('play', { playbackPosition: this.playhead.getPosition() });
           this.playing = true;
         }
       } else {
         this.sequencer.stop();
-        if (this._map) this.btnPlay.innerHTML = this.options.btnPlayContent;
+        if (this._map && this.btnStop)
+          this.btnPlay.innerHTML = this.options.btnPlay;
         this.fire('pause', { playbackPosition: this.playhead.getPosition() });
         this.playing = false;
       }
@@ -201,7 +230,7 @@
       this.options.max = minMax.max;
       this.options.min = minMax.min;
 
-      if (!this._map) return; // update UI only, if it's on the map
+      if (!this._map) return; // update UI only if it's on the map
       var mapBounds = this._map.getBounds();
       this.shadowL.setBounds([[-180, mapBounds._southWest.lng], [180, minMax.min]]);
       this.shadowR.setBounds([[-180, minMax.max], [180, mapBounds._northEast.lng]]);
